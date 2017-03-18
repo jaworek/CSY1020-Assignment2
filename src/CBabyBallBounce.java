@@ -17,6 +17,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	private JMenu menuScenario, menuEdit, menuControls, menuHelp;
 	private JMenuItem itemUp, itemDown, itemLeft, itemRight;
 	private JMenuItem itemExit, itemHelp, itemAbout;
+	private JMenuItem item2Players, item4Players, itemMulti;
 
 	// Panels
 	private JPanel panelCenter, panelBottom, panelRight;
@@ -24,7 +25,11 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	// Main panel
 	private JButton buttonGrid[] = new JButton[208];
 	private int ballPosition = 101; // Initial position of the ball
-	private int baby1Position = 100, baby2Position = 107, baby3Position = 113, baby4Position = 126;
+	private int babyPosition[] = { 100, 107, 113, 126, 35, 44 }; // Initial
+																	// position
+																	// of
+	// the babies
+	private int players = 2; // Number of players
 
 	// Right panel
 	private JPanel panelFirst, panelSecond, panelThird, panelFourth, panelFifth;
@@ -54,9 +59,10 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	private JButton buttonTwoPlayers, buttonFourPlayers, buttonMulti, buttonExit;
 	// Images
 	private ImageIcon iconBall, iconRun, iconPause, iconAct, iconReset, iconNorth, iconSouth, iconWest, iconEast,
-			iconWall, iconBaby1, iconBaby2, iconWhite;
+			iconWall, iconBaby1, iconBaby2, iconWhite, iconBallBricks;
 
 	// Timer
+	boolean started = false;
 	private int ticks = 0;
 	private Timer timer;
 	private DecimalFormat decimalFormat = new DecimalFormat("00");
@@ -135,6 +141,18 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		// edit
 		menuEdit = new JMenu("Edit");
 		menuBar.add(menuEdit);
+		
+		item2Players = new JMenuItem("2 Players");
+		menuEdit.add(item2Players);
+		item2Players.addActionListener(this);
+		
+		item4Players = new JMenuItem("4 Players");
+		menuEdit.add(item4Players);
+		item4Players.addActionListener(this);
+		
+		itemMulti = new JMenuItem("Multi");
+		menuEdit.add(itemMulti);
+		itemMulti.addActionListener(this);
 
 		// controls
 		menuControls = new JMenu("Controls");
@@ -199,6 +217,8 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 					Toolkit.getDefaultToolkit().createImage(CBabyBallBounce.class.getResource("images/baby2.png")));
 			iconWhite = new ImageIcon(Toolkit.getDefaultToolkit()
 					.createImage(CBabyBallBounce.class.getResource("images/white32x32.jpg")));
+			iconBallBricks = new ImageIcon(Toolkit.getDefaultToolkit()
+					.createImage(CBabyBallBounce.class.getResource("images/ballbricks.jpg")));
 		} catch (Exception e)
 		{
 			System.err.println("Baby Icon ImageIcon " + e);
@@ -221,10 +241,10 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			buttonGrid[i].setBorderPainted(false);
 			buttonGrid[i].setMargin(new Insets(0, 0, 0, 0));
 			panelCenter.add(buttonGrid[i]);
-			if (i == baby1Position)
+			if (i == babyPosition[0])
 			{
 				buttonGrid[i].setIcon(iconBaby1);
-			} else if (i == baby2Position)
+			} else if (i == babyPosition[1])
 			{
 				buttonGrid[i].setIcon(iconBaby2);
 			} else if (i == ballPosition)
@@ -337,7 +357,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		panelSecond.setPreferredSize(new Dimension(200, 100));
 		panelRight.add(panelSecond);
 
-		labelOption = new JLabel(" Option:");
+		labelOption = new JLabel("  Option:");
 		panelSecond.add(labelOption);
 
 		textOption = new JTextField("2 players");
@@ -345,7 +365,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		textOption.setEditable(false);
 		panelSecond.add(textOption);
 
-		labelSquare = new JLabel(" Square:");
+		labelSquare = new JLabel("  Square:");
 		panelSecond.add(labelSquare);
 
 		textSquare = new JTextField("" + ballPosition);
@@ -353,7 +373,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		textSquare.setEditable(false);
 		panelSecond.add(textSquare);
 
-		labelDirection = new JLabel(" Direction:");
+		labelDirection = new JLabel("  Direction:");
 		panelSecond.add(labelDirection);
 
 		textDirection = new JTextField("East");
@@ -369,7 +389,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		panelThird.setPreferredSize(new Dimension(200, 100));
 		panelRight.add(panelThird);
 
-		buttonBlank1 = new JButton(" ");
+		buttonBlank1 = new JButton();
 		panelThird.add(buttonBlank1);
 		buttonBlank1.setEnabled(false);
 
@@ -377,7 +397,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		panelThird.add(buttonUp);
 		buttonUp.addActionListener(this);
 
-		buttonBlank2 = new JButton(" ");
+		buttonBlank2 = new JButton();
 		panelThird.add(buttonBlank2);
 		buttonBlank2.setEnabled(false);
 
@@ -392,7 +412,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		panelThird.add(buttonRight);
 		buttonRight.addActionListener(this);
 
-		buttonBlank3 = new JButton(" ");
+		buttonBlank3 = new JButton();
 		panelThird.add(buttonBlank3);
 		buttonBlank3.setEnabled(false);
 
@@ -400,7 +420,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		panelThird.add(buttonDown);
 		buttonDown.addActionListener(this);
 
-		buttonBlank4 = new JButton(" ");
+		buttonBlank4 = new JButton();
 		panelThird.add(buttonBlank4);
 		buttonBlank4.setEnabled(false);
 	}
@@ -443,6 +463,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	// Button functions
 	public void buttonAct()
 	{
+		// babyMove();
 		if (textDirection.getText().equals("North"))
 		{
 			buttonUp();
@@ -467,6 +488,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			timer.stop();
 			run = false;
 			buttonAct.setEnabled(true);
+			started = false;
 		} else
 		{
 			buttonRun.setIcon(iconPause);
@@ -475,6 +497,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			timer.start();
 			run = true;
 			buttonAct.setEnabled(false);
+			started = true;
 		}
 	}
 
@@ -492,6 +515,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			timer.stop();
 			run = false;
 			buttonAct.setEnabled(true);
+			started = false;
 		}
 
 		if (ballPosition % 16 == 7 || ballPosition % 16 == 8)
@@ -501,7 +525,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		{
 			buttonGrid[ballPosition].setIcon(iconWhite);
 		}
-		
+
 		ballPosition = 101;
 		textSquare.setText("" + ballPosition);
 		buttonGrid[ballPosition].setIcon(iconBall);
@@ -516,16 +540,24 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	{
 		buttonCompass.setIcon(iconNorth);
 		textDirection.setText("North");
+		boolean move = true;
 
 		if (ballPosition - 16 < 0)
 		{
-			textDirection.setText("South");
+			// textDirection.setText("South");
+			changeDirection();
 		} else
 		{
-			if (ballPosition - 16 == 100 || ballPosition - 16 == 107)
+			for (int i = 0; i < players; i++)
 			{
-				textDirection.setText("South");
-			} else
+				if (ballPosition - 16 == babyPosition[i])
+				{
+					// textDirection.setText("South");
+					changeDirection();
+					move = false;
+				}
+			}
+			if (move)
 			{
 				buttonGrid[ballPosition].setIcon(iconWhite);
 				buttonGrid[ballPosition - 16].setIcon(iconBall);
@@ -536,6 +568,10 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			{
 				buttonGrid[ballPosition + 16].setIcon(iconWall);
 			}
+			if ((ballPosition) % 16 == 7 || (ballPosition) % 16 == 8)
+			{
+				buttonGrid[ballPosition].setIcon(iconBallBricks);
+			}
 		}
 	}
 
@@ -543,16 +579,24 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	{
 		buttonCompass.setIcon(iconSouth);
 		textDirection.setText("South");
+		boolean move = true;
 
 		if (ballPosition + 16 > 207)
 		{
-			textDirection.setText("North");
+			// textDirection.setText("North");
+			changeDirection();
 		} else
 		{
-			if (ballPosition + 16 == 100 || ballPosition + 16 == 107)
+			for (int i = 0; i < players; i++)
 			{
-				textDirection.setText("North");
-			} else
+				if (ballPosition + 16 == babyPosition[i])
+				{
+					// textDirection.setText("North");
+					changeDirection();
+					move = false;
+				}
+			}
+			if (move)
 			{
 				buttonGrid[ballPosition].setIcon(iconWhite);
 				buttonGrid[ballPosition + 16].setIcon(iconBall);
@@ -563,6 +607,10 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			{
 				buttonGrid[ballPosition - 16].setIcon(iconWall);
 			}
+			if ((ballPosition) % 16 == 7 || (ballPosition) % 16 == 8)
+			{
+				buttonGrid[ballPosition].setIcon(iconBallBricks);
+			}
 		}
 	}
 
@@ -570,6 +618,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	{
 		buttonCompass.setIcon(iconWest);
 		textDirection.setText("West");
+		boolean move = true;
 
 		if (ballPosition % 16 == 0)
 		{
@@ -580,11 +629,16 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			textScoreR.setText("" + decimalFormat.format(scoreR));
 		} else
 		{
-			// System.out.println("test 1");
-			if (ballPosition - 1 == 100 || ballPosition - 1 == 107)
+			for (int i = 0; i < players; i++)
 			{
-				textDirection.setText("East");
-			} else
+				if (ballPosition - 1 == babyPosition[i])
+				{
+					// textDirection.setText("East");
+					changeDirection();
+					move = false;
+				}
+			}
+			if (move)
 			{
 				buttonGrid[ballPosition].setIcon(iconWhite);
 				buttonGrid[ballPosition - 1].setIcon(iconBall);
@@ -595,6 +649,10 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			{
 				buttonGrid[ballPosition + 1].setIcon(iconWall);
 			}
+			if ((ballPosition) % 16 == 7 || (ballPosition) % 16 == 8)
+			{
+				buttonGrid[ballPosition].setIcon(iconBallBricks);
+			}
 		}
 	}
 
@@ -602,6 +660,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 	{
 		buttonCompass.setIcon(iconEast);
 		textDirection.setText("East");
+		boolean move = true;
 
 		if ((ballPosition + 1) % 16 == 0)
 		{
@@ -612,11 +671,16 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			textScoreL.setText("" + decimalFormat.format(scoreL));
 		} else
 		{
-			// System.out.println("test 2");
-			if (ballPosition + 1 == 100 || ballPosition + 1 == 107)
+			for (int i = 0; i < players; i++)
 			{
-				textDirection.setText("West");
-			} else
+				if (ballPosition + 1 == babyPosition[i])
+				{
+					// textDirection.setText("West");
+					changeDirection();
+					move = false;
+				}
+			}
+			if (move)
 			{
 				buttonGrid[ballPosition].setIcon(iconWhite);
 				buttonGrid[ballPosition + 1].setIcon(iconBall);
@@ -627,26 +691,44 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 			{
 				buttonGrid[ballPosition - 1].setIcon(iconWall);
 			}
+			if ((ballPosition) % 16 == 7 || (ballPosition) % 16 == 8)
+			{
+				buttonGrid[ballPosition].setIcon(iconBallBricks);
+			}
 		}
 	}
 
 	public void buttonTwoPlayers()
 	{
+		buttonReset();
+		players = 2;
 		textOption.setText("2 players");
-		buttonGrid[baby3Position].setIcon(iconWhite);
-		buttonGrid[baby4Position].setIcon(iconWhite);
+		buttonGrid[babyPosition[2]].setIcon(iconWhite);
+		buttonGrid[babyPosition[3]].setIcon(iconWhite);
+		buttonGrid[babyPosition[4]].setIcon(iconWhite);
+		buttonGrid[babyPosition[5]].setIcon(iconWhite);
 	}
 
 	public void buttonFourPlayers()
 	{
+		buttonReset();
+		players = 4;
 		textOption.setText("4 players");
-		buttonGrid[baby3Position].setIcon(iconBaby1);
-		buttonGrid[baby4Position].setIcon(iconBaby2);
+		buttonGrid[babyPosition[2]].setIcon(iconBaby1);
+		buttonGrid[babyPosition[3]].setIcon(iconBaby2);
+		buttonGrid[babyPosition[4]].setIcon(iconWhite);
+		buttonGrid[babyPosition[5]].setIcon(iconWhite);
 	}
 
 	public void buttonMulti()
 	{
+		buttonReset();
+		players = 6;
 		textOption.setText("Multi");
+		buttonGrid[babyPosition[2]].setIcon(iconBaby1);
+		buttonGrid[babyPosition[3]].setIcon(iconBaby2);
+		buttonGrid[babyPosition[4]].setIcon(iconBaby1);
+		buttonGrid[babyPosition[5]].setIcon(iconBaby2);
 	}
 
 	public void buttonExit()
@@ -654,6 +736,7 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		System.exit(0);
 	}
 
+	// Information in menuBar
 	public void help()
 	{
 		JOptionPane.showMessageDialog(window, "Bob", "Help", JOptionPane.INFORMATION_MESSAGE);
@@ -676,6 +759,65 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		textMinutes.setText(decimalFormat.format(minutes));
 		textSeconds.setText(decimalFormat.format(seconds));
 		ticks++;
+	}
+
+	private void babyMove()
+	{
+		for (int i = 0; i < players; i++)
+		{
+			babyPosition[i] += 16;
+			switch (i)
+			{
+			case 0:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby1);
+				break;
+			case 1:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby2);
+				break;
+			case 2:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby1);
+				break;
+			case 3:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby2);
+				break;
+			case 4:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby2);
+				break;
+			case 5:
+				buttonGrid[babyPosition[i] - 16].setIcon(iconWhite);
+				buttonGrid[babyPosition[i]].setIcon(iconBaby2);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	private void changeDirection()
+	{
+		int random = (int) Math.floor(Math.random() * 4);
+		switch (random)
+		{
+		case 0:
+			textDirection.setText("East");
+			break;
+		case 1:
+			textDirection.setText("West");
+			break;
+		case 2:
+			textDirection.setText("North");
+			break;
+		case 3:
+			textDirection.setText("South");
+			break;
+		default:
+			break;
+		}
 	}
 
 	public void actionPerformed(ActionEvent event)
@@ -702,13 +844,13 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 		} else if (source == buttonRight || source == itemRight)
 		{
 			buttonRight();
-		} else if (source == buttonTwoPlayers)
+		} else if (source == buttonTwoPlayers || source == item2Players)
 		{
 			buttonTwoPlayers();
-		} else if (source == buttonFourPlayers)
+		} else if (source == buttonFourPlayers || source == item4Players)
 		{
 			buttonFourPlayers();
-		} else if (source == buttonMulti)
+		} else if (source == buttonMulti || source == itemMulti)
 		{
 			buttonMulti();
 		} else if (source == buttonExit || source == itemExit)
@@ -728,8 +870,13 @@ public class CBabyBallBounce extends JFrame implements ActionListener, ChangeLis
 
 	public void stateChanged(ChangeEvent e)
 	{
-		int sliderValue = sliderSpeed.getValue();
-		System.out.println(sliderValue);
+		// System.out.println(timer.start());
+		if (started == true)
+		{
+			timer.stop();
+			timer = new Timer(sliderSpeed.getValue(), this);
+			timer.start();
+		}
 	}
 
 	// source:
